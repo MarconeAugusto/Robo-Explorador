@@ -5,14 +5,14 @@ from time import sleep
 from ev3dev.ev3 import *
 
 # ------Input--------
-power = 30			#Potência do motor.
+power = 30		#Potência do motor.
 target = 55
 kp = float(0.65) 	# Proportional gain. Start value 1.
 kd = 1           	# Derivative gain. Start value 0.
 ki = float(0.02) 	# Integral gain. Start value 0.
 direction = -1 		# Define a borda da linha que o sensor de cor seguirá.
-minRef = 41			# Valor mínimo refletido.
-maxRef = 63			# Valor máximo refletido.
+minRef = 41		# Valor mínimo refletido.
+maxRef = 63		# Valor máximo refletido.
 # -------------------
 
 
@@ -48,7 +48,7 @@ def vira():
 		
 		while (cor != 1) and (cor != 6): # Enquanto for verde 
 			right_motor.run_forever(speed_sp=-50)
-			left_motor.run_forever(speed_sp=100) # encontra preto, branco e outro preto
+			left_motor.run_forever(speed_sp=100) # encontra preto, branco e outro preto (Verificar)
 			cor = sensorCor.value()
 		right_motor.run_forever(speed_sp=0)
 		left_motor.run_forever(speed_sp=100)
@@ -96,7 +96,7 @@ def seguirLinha(power, target, kp, kd, ki, direction, minRef, maxRef):
 			motor.duty_cycle_sp = pow
 		sleep(0.01) # Aprox. 100Hz
 		
-		sensorCor.mode='COL-COLOR'		# Altera para modo cor
+		sensorCor.mode='COL-COLOR'	# Altera para modo cor
 		cor = sensorCor.value()
 		if (cor != 1) and (cor != 6):
 			left_motor.stop(stop_action='brake')
@@ -110,3 +110,10 @@ while not btn.any() :
 # Para os motores após sair do looping.
 left_motor.stop(stop_action='brake')
 right_motor.stop(stop_action='brake')
+
+'''
+REFERÊNCIAS
+
+As funções seguirLinha e guiarPelaLinha são adaptações do código orinigal disponível em: 
+https://github.com/Klabbedi/ev3
+'''
