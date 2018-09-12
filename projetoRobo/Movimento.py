@@ -7,19 +7,19 @@ from ev3dev.ev3 import *
 class Movimento:
 
 	# ------Input--------
-	power = 40			#Potência do motor.
+	power = 40		#Potência do motor.
 	target = 55
 	kp = float(0.65) 	# Proportional gain. Start value 1.
 	kd = 1           	# Derivative gain. Start value 0.
 	ki = float(0.02) 	# Integral gain. Start value 0.
 	direction = -1 		# Define a borda da linha que o sensor de cor seguirá.
-	minRef = 41			# Valor mínimo refletido.
-	maxRef = 63			# Valor máximo refletido.
+	minRef = 41		# Valor mínimo refletido.
+	maxRef = 63		# Valor máximo refletido.
 	# -------------------
 
 	# Conecta os dois LargeMotor às portas B e C.
-	left_motor = LargeMotor(OUTPUT_C)
-	right_motor = LargeMotor(OUTPUT_B)
+	motorEsquerda = LargeMotor(OUTPUT_C)
+	motorDireita = LargeMotor(OUTPUT_B)
 
 	# Declara sensores ColorSensor e UltrasonicSensor.
 	sensorCor = ColorSensor()
@@ -31,7 +31,7 @@ class Movimento:
 	# Altera modo do sensor ultrassônico.
 	sensorUS.mode='US-DIST-CM'
 
-	def vira():
+	def move():
 		direcao = input("Informe a direcao: ")
 
 		cor = sensorCor.value()
@@ -59,8 +59,8 @@ class Movimento:
 		print("Indo para a frente")
 		while (cor != 1) and (cor != 6): # Enquanto for verde
 			cor = sensorCor.value()
-			left_motor.run_forever(speed_sp=100)
-			right_motor.run_forever(speed_sp=50)
+			motorEsquerda.run_forever(speed_sp=100)
+			motorDireita.run_forever(speed_sp=50)
 
 
 
@@ -68,26 +68,26 @@ class Movimento:
 		print("Virando para a esquerda")
 		while (cor != 1) and (cor != 6): # Enquanto for verde
 			cor = sensorCor.value()
-			left_motor.stop(stop_action='brake')
-			right_motor.run_forever(speed_sp=100)
+			motorEsquerda.stop(stop_action='brake')
+			motorDireita.run_forever(speed_sp=100)
 		while (cor != 1):
 			cor = sensorCor.value()
-			left_motor.stop(stop_action='brake')
-			right_motor.run_forever(speed_sp=200)
+			motorEsquerda.stop(stop_action='brake')
+			motorDireita.run_forever(speed_sp=200)
 
 	def direita(cor):
 		#print("Virando para a direita")
 		frente(cor)
 
-		right_motor.stop(stop_action='brake')
-		left_motor.run_forever(speed_sp=200)
+		motorDireita.stop(stop_action='brake')
+		motorEsquerda.run_forever(speed_sp=200)
 		sleep(1)
 		sleep(1)
 
 		while (cor != 1):
 			cor = sensorCor.value()
-			right_motor.stop(stop_action='brake')
-			left_motor.run_forever(speed_sp=200)
+			motorDireita.stop(stop_action='brake')
+			motorEsquerda.run_forever(speed_sp=200)
 
 	def re(cor):
 		print("Marcha a re")
@@ -102,16 +102,16 @@ class Movimento:
 			sensorCor.mode='COL-COLOR'		# Altera para modo cor
 			cor = sensorCor.value()
 			direita(cor)
-			left_motor.run_direct()
-			right_motor.run_direct()
+			motorEsquerda.run_direct()
+			motorDireita.run_direct()
 
 	'''
 	def encontraInterseccao():
 		sensorCor.mode='COL-COLOR'		# Altera para modo cor
 		cor = sensorCor.value()
 		if (cor != 1) and (cor != 6):
-			left_motor.stop(stop_action='brake')
-			right_motor.stop(stop_action='brake')
+			motorEsquerda.stop(stop_action='brake')
+			motorDireita.stop(stop_action='brake')
 			return True
 		else:
 			return False
@@ -121,9 +121,9 @@ class Movimento:
 	def encontraInterseccao():
 		sensorCor.mode='COL-COLOR'		# Altera para modo cor
 		cor = sensorCor.value()
-		if (cor == 3):
-			left_motor.stop(stop_action='brake')
-			right_motor.stop(stop_action='brake')
+		if (cor == 3): # verde
+			motorEsquerda.stop(stop_action='brake')
+			motorDireita.stop(stop_action='brake')
 			return True
 		else:
 			return False
@@ -149,10 +149,10 @@ class Movimento:
 
 		interseccaoEncontrada = encontraInterseccao()
 		if interseccaoEncontrada: # Encontra a intersecção da posição incial
-			vira()
+			move()
 
-		left_motor.run_direct()
-		right_motor.run_direct()
+		motorEsquerda.run_direct()
+		motorDireita.run_direct()
 
 		while not btn.any() :
 
@@ -165,20 +165,20 @@ class Movimento:
 			lastError = error
 			integral = float(0.5) * integral + error
 			course = (kp * error + kd * derivative +ki * integral) * direction
-			for (motor, pow) in zip((left_motor, right_motor), manterNaLinha(course, power)):
+			for (motor, pow) in zip((motorEsquerda, motorDireita), manterNaLinha(course, power)):
 				motor.duty_cycle_sp = pow
 			sleep(0.01) # Aprox. 100Hz
 
 			interseccaoEncontrada = encontraInterseccao()
 			if interseccaoEncontrada:
-				vira()
+				move()
 				break
 
 	seguirLinha(power, target, kp, kd, ki, direction, minRef, maxRef)
 
 	# Para os motores após sair do looping.
-	left_motor.stop(stop_action='brake')
-	right_motor.stop(stop_action='brake')
+	motorEsquerda.stop(stop_action='brake')
+	motorDireita.stop(stop_action='brake')
 
 '''
 REFERÊNCIAS
