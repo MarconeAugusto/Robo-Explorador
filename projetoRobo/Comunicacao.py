@@ -47,3 +47,7 @@ class Comunicacao:
 	def setAtualizaPosicao(direcao): #testar conflito
 		return Manual.setAtualizaPosicao(direcao)
 		
+	def getPosicaoAtual():#utilizado para validar caças
+		return Manual.getPosicaoAtual()
+		
+	
