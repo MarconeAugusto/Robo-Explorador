@@ -1,3 +1,5 @@
+from projetoRobo import *
+
 class Comunicacao:
 	
 	#Inicialização
@@ -42,7 +44,6 @@ class Comunicacao:
 		return Autonomo.setFimDeJogo()
 				
 	#Modo Manual
-	def setAtualizaPosicao(posAtual): #testar conflito
-		return Manual.setAtualizaPosicao(posAtual)
+	def setAtualizaPosicao(direcao): #testar conflito
+		return Manual.setAtualizaPosicao(direcao)
 		
-	
