@@ -14,8 +14,6 @@ direction = -1 		# Define a borda da linha que o sensor de cor seguirá.
 minRef = 41		# Valor mínimo refletido.
 maxRef = 63		# Valor máximo refletido.
 
-
-
 # Conecta os dois LargeMotor às portas B e C.
 motorEsquerda = LargeMotor(OUTPUT_C)
 motorDireita = LargeMotor(OUTPUT_B)
@@ -32,24 +30,12 @@ sensorUS.mode='US-DIST-CM'
 
 # ---------------------------------------------------------------------------------------
 
-
-
-
-
-
 # def init da classe POSICIONAMENTO
 eixoX = 0
 eixoY = 0
 orientacao = 1
 
-
-
-
-
-
 # CLASSE POSICIONAMENTO
-
-
 def getEixoX():
 	return eixoX
 
@@ -90,15 +76,6 @@ def paraString():
 
 
 # ----------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 
 # CLASSE MOVIMENTO
 
