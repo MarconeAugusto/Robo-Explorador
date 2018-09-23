@@ -3,186 +3,203 @@
 
 from time import sleep
 from ev3dev.ev3 import *
+from Posicionamento import *
 
 class Movimento:
 
-	# ------Input--------
-	power = 40		#Potência do motor.
-	target = 55
-	kp = float(0.65) 	# Proportional gain. Start value 1.
-	kd = 1           	# Derivative gain. Start value 0.
-	ki = float(0.02) 	# Integral gain. Start value 0.
-	direction = -1 		# Define a borda da linha que o sensor de cor seguirá.
-	minRef = 41		# Valor mínimo refletido.
-	maxRef = 63		# Valor máximo refletido.
-	# -------------------
+    def __init__(self, power, target, kp, kd, ki, direction, minRef, maxRef):
+        self.power = power
+        self.target = target
+        self.kp = kp
+        self.kd = kd
+        self.ki = ki
+        self.direction = direction
+        self.minRef = minRef
+        self.maxRef = maxRef
 
-	# Conecta os dois LargeMotor às portas B e C.
-	motorEsquerda = LargeMotor(OUTPUT_C)
-	motorDireita = LargeMotor(OUTPUT_B)
+        # Conecta os dois LargeMotor às portas B e C.
+        self.motorEsquerda = LargeMotor(OUTPUT_C)
+        self.motorDireita = LargeMotor(OUTPUT_B)
 
-	# Declara sensores ColorSensor e UltrasonicSensor.
-	sensorCor = ColorSensor()
-	sensorUS = UltrasonicSensor()
+        # Declara sensores ColorSensor e UltrasonicSensor.
+        self.sensorCor = ColorSensor()
+        self.sensorUS = UltrasonicSensor()
 
-	# Declara botão de interrupção.
-	btn = Button()
+        # Declara botão de interrupção.
+        self.btn = Button()
 
-	# Altera modo do sensor ultrassônico.
-	sensorUS.mode='US-DIST-CM'
+        # Altera modo do sensor ultrassônico.
+        self.sensorUS.mode = 'US-DIST-CM'
 
-	def move():
-		direcao = input("Informe a direcao: ")
+        self.pos = Posicionamento(0,0,1)
 
-		cor = sensorCor.value()
-		if direcao == '0':
-			frente(cor)
-			pass
+    def move(self, direcao):
 
-		elif direcao == '1':
-			esquerda(cor)
-			pass
+        #self.direcao = direcao
 
-		elif direcao == '2':
-			direita(cor)
-			pass
+        #direcao = input("Informe a direcao: ")
 
-		elif direcao == '3':
-			re(cor)
-			pass
+        cor = self.sensorCor.value()
+        if direcao == '0':
+            self.frente(cor)
+            pass
 
-		seguirLinha(power, target, kp, kd, ki, direction, minRef, maxRef)
+        elif direcao == '1':
+            self.esquerda(cor)
+
+            # Orientacao
+            if self.pos.getOrientacao() == 1:
+                self.pos.setOrientacao(4)
 
 
-
-	def frente(cor):
-		print("Indo para a frente")
-		while (cor != 1) and (cor != 6): # Enquanto for verde
-			cor = sensorCor.value()
-			motorEsquerda.run_forever(speed_sp=100)
-			motorDireita.run_forever(speed_sp=50)
+            else:
+                self.pos.setOrientacao(self.pos.getOrientacao() - 1)
+            pass
 
 
+        elif direcao == '2':
+            self.direita(cor)
 
-	def esquerda(cor):
-		print("Virando para a esquerda")
-		while (cor != 1) and (cor != 6): # Enquanto for verde
-			cor = sensorCor.value()
-			motorEsquerda.stop(stop_action='brake')
-			motorDireita.run_forever(speed_sp=100)
-		while (cor != 1):
-			cor = sensorCor.value()
-			motorEsquerda.stop(stop_action='brake')
-			motorDireita.run_forever(speed_sp=200)
+            # Orientacao
+            if self.pos.getOrientacao() == 4:
+                self.pos.setOrientacao(1)
+            else:
+                self.pos.setOrientacao(self.pos.getOrientacao() + 1)
+            pass
 
-	def direita(cor):
-		#print("Virando para a direita")
-		frente(cor)
+        elif direcao == '3':
+            self.re(cor)
 
-		motorDireita.stop(stop_action='brake')
-		motorEsquerda.run_forever(speed_sp=200)
-		sleep(1)
-		sleep(1)
+            if self.pos.getOrientacao() == 3:
+                self.pos.setOrientacao(1)
 
-		while (cor != 1):
-			cor = sensorCor.value()
-			motorDireita.stop(stop_action='brake')
-			motorEsquerda.run_forever(speed_sp=200)
+            elif self.pos.getOrientacao() == 4:
+                self.pos.setOrientacao(2)
 
-	def re(cor):
-		print("Marcha a re")
-		direita(cor)
-		direita(cor)
+            else:
+                self.pos.setOrientacao(self.pos.getOrientacao() + 2)
+            pass
 
-	# Função incompleta - VOLTAR PARA A POSIÇÃO ANTERIOR
-	def detectarObstaculos():
-		distancia = sensorUS.value()/10
-		if distancia < 10: # Se há obstáculos
-			print("Obstaculo")
-			sensorCor.mode='COL-COLOR'		# Altera para modo cor
-			cor = sensorCor.value()
-			direita(cor)
-			motorEsquerda.run_direct()
-			motorDireita.run_direct()
+        if self.pos.getOrientacao() == 1:  # Norte
+            self.pos.setEixoY(self.pos.getEixoY() + 1)
 
-	'''
-	def encontraInterseccao():
-		sensorCor.mode='COL-COLOR'		# Altera para modo cor
-		cor = sensorCor.value()
-		if (cor != 1) and (cor != 6):
-			motorEsquerda.stop(stop_action='brake')
-			motorDireita.stop(stop_action='brake')
-			return True
-		else:
-			return False
+        elif self.pos.getOrientacao() == 2:  # Leste
+            self.pos.setEixoX(self.pos.getEixoX() + 1)
 
-	'''
+        elif self.pos.getOrientacao() == 3:  # Sul
+            self.pos.setEixoY(self.pos.getEixoY() - 1)
 
-	def encontraInterseccao():
-		sensorCor.mode='COL-COLOR'		# Altera para modo cor
-		cor = sensorCor.value()
-		if (cor == 3): # verde
-			motorEsquerda.stop(stop_action='brake')
-			motorDireita.stop(stop_action='brake')
-			return True
-		else:
-			return False
+        elif self.pos.getOrientacao() == 4:  # Oeste
+            self.pos.setEixoX(self.pos.getEixoX() - 1)
 
-	def manterNaLinha(course, power):
-		power_left = power_right = power
-		s = (50 - abs(float(course))) / 50
-		if course >= 0:
-			power_right *= s
-			if course > 100:
-				power_right = - power
-		else:
-			power_left *= s
-			if course < -100:
-				power_left = - power
-		return (int(power_left), int(power_right))
+        print(self.pos.paraString())
+        self.seguirLinha(self.power, self.target, self.kp, self.kd, self.ki, self.direction, self.minRef, self.maxRef)
 
+    def frente(self, cor):
+        #print("Indo para a frente")
+        while (cor != 1) and (cor != 6):  # Enquanto for verde
+            cor = self.sensorCor.value()
+            self.motorEsquerda.run_forever(speed_sp=100)
+            self.motorDireita.run_forever(speed_sp=50)
 
+    def esquerda(self, cor):
+        #print("Virando para a esquerda")
+        while (cor != 1) and (cor != 6):  # Enquanto for verde
+            cor = self.sensorCor.value()
+            self.motorEsquerda.stop(stop_action='brake')
+            self.motorDireita.run_forever(speed_sp=100)
+        while (cor != 1):
+            cor = self.sensorCor.value()
+            self.motorEsquerda.stop(stop_action='brake')
+            self.motorDireita.run_forever(speed_sp=200)
 
-	def seguirLinha(power, target, kp, kd, ki, direction, minRef, maxRef):
+    def direita(self, cor):
+        #print("Virando para a direita")
+        self.frente(cor)
 
-		lastError = error = integral = 0
+        self.motorDireita.stop(stop_action='brake')
+        self.motorEsquerda.run_forever(speed_sp=200)
+        sleep(1)
+        sleep(1)
 
-		interseccaoEncontrada = encontraInterseccao()
-		if interseccaoEncontrada: # Encontra a intersecção da posição incial
-			move()
+        while (cor != 1):
+            cor = self.sensorCor.value()
+            self.motorDireita.stop(stop_action='brake')
+            self.motorEsquerda.run_forever(speed_sp=200)
 
-		motorEsquerda.run_direct()
-		motorDireita.run_direct()
+    def re(self, cor):
+        #print("Marcha a re")
+        self.direita(cor)
+        self.direita(cor)
 
-		while not btn.any() :
+    # Função incompleta - VOLTAR PARA A POSIÇÃO ANTERIOR
+    def detectarObstaculos(self):
+        distancia = self.sensorUS.value() / 10
+        if distancia < 10:  # Se há obstáculos
+            print("Obstaculo")
+            self.sensorCor.mode = 'COL-COLOR'  # Altera para modo cor
+            cor = self.sensorCor.value()
+            self.direita(cor)
+            self.motorEsquerda.run_direct()
+            self.motorDireita.run_direct()
 
-			detectarObstaculos() # Para quando encontra um obstáculo
+    def encontraInterseccao(self):
+        self.sensorCor.mode = 'COL-COLOR'  # Altera para modo cor
+        cor = self.sensorCor.value()
+        if (cor == 3):  # verde
+            self.motorEsquerda.stop(stop_action='brake')
+            self.motorDireita.stop(stop_action='brake')
+            return True
+        else:
+            return False
 
-			sensorCor.mode = 'COL-REFLECT'	# Altera para modo refletido
-			refRead = sensorCor.value()
-			error = target - (100 * ( refRead - minRef ) / ( maxRef - minRef ))
-			derivative = error - lastError
-			lastError = error
-			integral = float(0.5) * integral + error
-			course = (kp * error + kd * derivative +ki * integral) * direction
-			for (motor, pow) in zip((motorEsquerda, motorDireita), manterNaLinha(course, power)):
-				motor.duty_cycle_sp = pow
-			sleep(0.01) # Aprox. 100Hz
+    def manterNaLinha(self, course, power):
+        power_left = power_right = power
+        s = (50 - abs(float(course))) / 50
+        if course >= 0:
+            power_right *= s
+            if course > 100:
+                power_right = - power
+        else:
+            power_left *= s
+            if course < -100:
+                power_left = - power
+        return (int(power_left), int(power_right))
 
-			interseccaoEncontrada = encontraInterseccao()
-			if interseccaoEncontrada:
-				move()
-				break
+    def seguirLinha(self, power, target, kp, kd, ki, direction, minRef, maxRef):
 
-	seguirLinha(power, target, kp, kd, ki, direction, minRef, maxRef)
+        lastError = error = integral = 0
 
-	# Para os motores após sair do looping.
-	motorEsquerda.stop(stop_action='brake')
-	motorDireita.stop(stop_action='brake')
+        #interseccaoEncontrada = self.encontraInterseccao()
+        #if interseccaoEncontrada:  # Encontra a intersecção da posição incial
+            #self.move()
+        #    return
+        self.motorEsquerda.run_direct()
+        self.motorDireita.run_direct()
 
-'''
-REFERÊNCIAS
+        while not self.btn.any():
 
-As funções seguirLinha e guiarPelaLinha são adaptações do código orinigal disponível em: 
-https://github.com/Klabbedi/ev3
-'''
+            self.detectarObstaculos()  # Para quando encontra um obstáculo
+
+            self.sensorCor.mode = 'COL-REFLECT'  # Altera para modo refletido
+            refRead = self.sensorCor.value()
+            error = target - (100 * (refRead - minRef) / (maxRef - minRef))
+            derivative = error - lastError
+            lastError = error
+            integral = float(0.5) * integral + error
+            course = (kp * error + kd * derivative + ki * integral) * direction
+            for (motor, pow) in zip((self.motorEsquerda, self.motorDireita), self.manterNaLinha(course, power)):
+                motor.duty_cycle_sp = pow
+            sleep(0.01)  # Aprox. 100Hz
+
+            interseccaoEncontrada = self.encontraInterseccao()
+            if interseccaoEncontrada:
+                #self.move()
+                break
+
+    '''
+    REFERÊNCIAS
+    
+    As funções seguirLinha e guiarPelaLinha são adaptações do código orinigal disponível em: 
+    https://github.com/Klabbedi/ev3
+    '''
