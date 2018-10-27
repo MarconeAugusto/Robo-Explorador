@@ -36,7 +36,7 @@ class Autonomo:
         self.posAtual = posAtual
         self.pausa = False
         self.finaliza = False
-        self.anda = Movimento(40, 55, float(0.65), 1, float(0.02), -1, 41, 63)
+        #self.anda = Movimento(40, 55, float(0.65), 1, float(0.02), -1, 41, 63)
 
         if posAtual.eixoX == 0:
             self.posAdversario = Posicionamento(20,20,3)
@@ -100,70 +100,119 @@ class Autonomo:
         #while not self.finaliza:
         self.ordenaLista()
 
-        # EIXO Y
-        if self.listaDeEstrategia[0].getEixoY() < self.getPosAtual().getEixoY(): # SE A CACA ESTA ABAIXO DO ROBO
+        # print(self.listaDeEstrategia[0].getEixoX())
+        # print(self.listaDeEstrategia[0].getEixoY())
+        # print(self.listaDeEstrategia[0].getDistanciaAteORobo())
 
+        # EIXO Y
+        if (self.listaDeEstrategia[0].getEixoY() == self.getPosAtual().getEixoY()) and (self.listaDeEstrategia[0].getEixoX() == self.getPosAtual().getEixoX()):
+            if len(self.listaDeEstrategia) > 1:
+                print("RETIREI")
+                self.listaDeEstrategia.pop(0)
+                print(self.listaDeEstrategia[0].getEixoX())
+                print(self.listaDeEstrategia[0].getEixoY())
+                print(self.listaDeEstrategia[0].getDistanciaAteORobo())
+            else:
+                print("FIM DE JOGO")
+                return 5
+            print("CHEGUEI!")
+            self.executaEstrategia()
+
+        if self.listaDeEstrategia[0].getEixoY() < self.getPosAtual().getEixoY(): # SE A CACA ESTA ABAIXO DO ROBO
+            print("CACA ESTA ABAIXO DO ROBO")
             if self.getPosAtual().getOrientacao() != 3: # EH NECESSARIO SUL
 
                 if self.getPosAtual().getOrientacao() == 1: # NORTE
-                    self.anda.move(3) #RE
+                    #self.anda.move(3) #RE
+                    return 3
+
 
                 elif self.getPosAtual().getOrientacao() == 2: # Leste
-                    self.anda.move(2)  # DIREITA
+                    #self.anda.move(2)  # DIREITA
+                    return 2
 
-                else: # OESTE
-                    self.anda.move(1)  # ESQUERDA
+                else:  # OESTE
+                    #self.anda.move(1)  # ESQUERDA
+                    return 1
 
-            while self.listaDeEstrategia[0].getEixoY() != self.getPosAtual().getEixoY():
-                self.anda.move(0) #FRENTE
+            else:
+                print("VOU PRA FRENTE POIS ACIMA")
+                #self.anda.move(0)  # FRENTE
+                return 0
 
 
-        elif self.listaDeEstrategia[0].getEixoY() > self.getPosAtual().getEixoY():  # SE A CACA ESTA ACIMA DO ROBO
+        if self.listaDeEstrategia[0].getEixoY() > self.getPosAtual().getEixoY():  # SE A CACA ESTA ACIMA DO ROBO
+            print("CACA ESTA ACIMA DO ROBO")
 
             if self.getPosAtual().getOrientacao() != 1:  # EH NECESSARIO NORTE
 
                 if self.getPosAtual().getOrientacao() == 2:  # LESTE
-                    self.anda.move(1)  # ESQUERDA
+                    #self.anda.move(1)  # ESQUERDA
+                    return 1
 
                 elif self.getPosAtual().getOrientacao() == 3:  # SUL
-                    self.anda.move(3)  # RE
+                    #self.anda.move(3)  # RE
+                    return 3
 
                 else:  # OESTE
-                    self.anda.move(2)  # DIREITA
+                    #self.anda.move(2)  # DIREITA
+                    return 2
 
-            while self.listaDeEstrategia[0].getEixoY() != self.getPosAtual().getEixoY():
-                self.anda.move(0)  # FRENTE
+            else:
+                print("VOU PRA FRENTE POIS ACIMA")
+                #self.anda.move(0)  # FRENTE
+                return 0
+
+            # while self.listaDeEstrategia[0].getEixoY() != self.getPosAtual().getEixoY():
+            #     self.anda.move(0)  # FRENTE
 
         # EIXO X
         if self.listaDeEstrategia[0].getEixoX() < self.getPosAtual().getEixoX():  # SE A CACA ESTA A ESQUERDA DO ROBO
+            print("CACA ESTA A ESQUERDA DO ROBO")
 
             if self.getPosAtual().getOrientacao() != 4:  # EH NECESSARIO OESTE
 
                 if self.getPosAtual().getOrientacao() == 1:  # NORTE
-                    self.anda.move(1)  # ESQUERDA
+                    #self.anda.move(1)  # ESQUERDA
+                    return 1
 
                 elif self.getPosAtual().getOrientacao() == 2:  # Leste
-                    self.anda.move(3)  # RE
+                    #self.anda.move(3)  # RE
+                    return 3
 
                 else:  # SUL
-                    self.anda.move(2)  # DIREITA
+                    #self.anda.move(2)  # DIREITA
+                    return 2
 
-            while self.listaDeEstrategia[0].getEixoX() != self.getPosAtual().getEixoX():
-                self.anda.move(0)  # FRENTE
+            else:
+                print("VOU PRA FRENTE POIS ACIMA")
+                #self.anda.move(0)  # FRENTE
+                return 0
 
 
         elif self.listaDeEstrategia[0].getEixoX() > self.getPosAtual().getEixoX():  # SE A CACA ESTA A DIREITA DO ROBO
+            print("CACA ESTA A DIREITA DO ROBO")
 
             if self.getPosAtual().getOrientacao() != 2:  # EH NECESSARIO LESTE
 
                 if self.getPosAtual().getOrientacao() == 1:  # NORTE
-                    self.anda.move(2)  # DIREITA
+                    #self.anda.move(2)  # DIREITA
+                    return 2
 
                 elif self.getPosAtual().getOrientacao() == 3:  # SUL
-                    self.anda.move(1)  # ESQUERDA
+                    #self.anda.move(1)  # ESQUERDA
+                    return 1
 
                 else:  # OESTE
-                    self.anda.move(3)  # RE
+                    #self.anda.move(3)  # RE
+                    return 3
 
-            while self.listaDeEstrategia[0].getEixoX() != self.getPosAtual().getEixoX():
-                self.anda.move(0)  # FRENTE
+            else:
+                #self.anda.move(0)  # FRENTE
+                return 0
+
+        # print("VOU EXECUTAR A ESTRATEGIA DE NOVO")
+        # self.executaEstrategia()
+
+            # while self.listaDeEstrategia[0].getEixoX() != self.getPosAtual().getEixoX():
+            #     self.anda.move(0)  # FRENTE

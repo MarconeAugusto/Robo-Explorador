@@ -1,21 +1,30 @@
 #!/usr/bin/env python3
 # coding: utf-8
-
+from threading import Thread
 from time import sleep
 from ev3dev.ev3 import *
+
 from Posicionamento import *
+from Autonomo import *
+
+#from Menu import *
+
+from ComunicacaoSR_SS import *
+
 
 class Movimento:
 
-    def __init__(self, power, target, kp, kd, ki, direction, minRef, maxRef):
-        self.power = power
-        self.target = target
-        self.kp = kp
-        self.kd = kd
-        self.ki = ki
-        self.direction = direction
-        self.minRef = minRef
-        self.maxRef = maxRef
+    def __init__(self, modoDeJogo):
+        self.power = 40
+        self.target = 55
+        self.kp = float(0.65)
+        self.kd = 1
+        self.ki = float(0.02)
+        self.direction = -1
+        self.minRef = 41
+        self.maxRef = 63
+        self.modoDeJogo = modoDeJogo
+        # self.direcao = 6
 
         # Conecta os dois LargeMotor às portas B e C.
         self.motorEsquerda = LargeMotor(OUTPUT_C)
@@ -31,20 +40,49 @@ class Movimento:
         # Altera modo do sensor ultrassônico.
         self.sensorUS.mode = 'US-DIST-CM'
 
-        self.pos = Posicionamento(0,0,1)
+        t1 = Thread(target=self.abrirServidor())
+        t1.start()
 
-    def move(self, direcao):
+        pos1 = Tesouro(3, 0, 0)
+        pos2 = Tesouro(0, 4, 0)
+        # pos3 = Tesouro(4, 5, 0)
+        self.lista2 = [pos1, pos2]
 
-        #self.direcao = direcao
+        self.pos = Posicionamento(0, 0, 1)
+        self.aut = Autonomo(self.pos, self.lista2)
 
-        #direcao = input("Informe a direcao: ")
+    # def setDirecao(self, direcao):
+    #     self.direcao = direcao
+    #
+    # def getDirecao(self):
+    #     return self.direcao
+
+    def abrirServidor(self):
+        self.comunica = ComunicacaoSR_SS()
+
+    def move(self):
+
+        # SELECIONA MODO DE JOGO
+        if self.modoDeJogo == 1:  # Autonomo
+            print("Consulta estrategia")
+            direcao = self.aut.executaEstrategia()
+
+        elif self.modoDeJogo == 2:  # Manual
+            #d = input("Informe a direcao: ")
+            #direcao = int(d)
+            direcao = self.comunica.setDirecaoManual()
+
+        if direcao == 5:
+            return
+
+        # PAUSA DO 5 É PRO MODO AUTÔNOMO
 
         cor = self.sensorCor.value()
-        if direcao == '0':
+        if direcao == 0:
             self.frente(cor)
             pass
 
-        elif direcao == '1':
+        elif direcao == 1:
             self.esquerda(cor)
 
             # Orientacao
@@ -57,7 +95,7 @@ class Movimento:
             pass
 
 
-        elif direcao == '2':
+        elif direcao == 2:
             self.direita(cor)
 
             # Orientacao
@@ -67,19 +105,28 @@ class Movimento:
                 self.pos.setOrientacao(self.pos.getOrientacao() + 1)
             pass
 
-        elif direcao == '3':
+        elif direcao == 3:
             self.re(cor)
+            self.atualizaOrientacaoRe()
 
-            if self.pos.getOrientacao() == 3:
-                self.pos.setOrientacao(1)
-
-            elif self.pos.getOrientacao() == 4:
-                self.pos.setOrientacao(2)
-
-            else:
-                self.pos.setOrientacao(self.pos.getOrientacao() + 2)
             pass
 
+        self.atualizaCoordenada()
+
+        print(self.pos.paraString())
+        self.seguirLinha(self.power, self.target, self.kp, self.kd, self.ki, self.direction, self.minRef, self.maxRef)
+
+    def atualizaOrientacaoRe(self):
+        if self.pos.getOrientacao() == 3:
+            self.pos.setOrientacao(1)
+
+        elif self.pos.getOrientacao() == 4:
+            self.pos.setOrientacao(2)
+
+        else:
+            self.pos.setOrientacao(self.pos.getOrientacao() + 2)
+
+    def atualizaCoordenada(self):
         if self.pos.getOrientacao() == 1:  # Norte
             self.pos.setEixoY(self.pos.getEixoY() + 1)
 
@@ -92,18 +139,15 @@ class Movimento:
         elif self.pos.getOrientacao() == 4:  # Oeste
             self.pos.setEixoX(self.pos.getEixoX() - 1)
 
-        print(self.pos.paraString())
-        self.seguirLinha(self.power, self.target, self.kp, self.kd, self.ki, self.direction, self.minRef, self.maxRef)
-
     def frente(self, cor):
-        #print("Indo para a frente")
+        # print("Indo para a frente")
         while (cor != 1) and (cor != 6):  # Enquanto for verde
             cor = self.sensorCor.value()
             self.motorEsquerda.run_forever(speed_sp=100)
             self.motorDireita.run_forever(speed_sp=50)
 
     def esquerda(self, cor):
-        #print("Virando para a esquerda")
+        # print("Virando para a esquerda")
         while (cor != 1) and (cor != 6):  # Enquanto for verde
             cor = self.sensorCor.value()
             self.motorEsquerda.stop(stop_action='brake')
@@ -114,7 +158,7 @@ class Movimento:
             self.motorDireita.run_forever(speed_sp=200)
 
     def direita(self, cor):
-        #print("Virando para a direita")
+        # print("Virando para a direita")
         self.frente(cor)
 
         self.motorDireita.stop(stop_action='brake')
@@ -128,7 +172,7 @@ class Movimento:
             self.motorEsquerda.run_forever(speed_sp=200)
 
     def re(self, cor):
-        #print("Marcha a re")
+        # print("Marcha a re")
         self.direita(cor)
         self.direita(cor)
 
@@ -170,10 +214,10 @@ class Movimento:
 
         lastError = error = integral = 0
 
-        #interseccaoEncontrada = self.encontraInterseccao()
-        #if interseccaoEncontrada:  # Encontra a intersecção da posição incial
-            #self.move()
-        #    return
+        self.interseccaoEncontrada = self.encontraInterseccao()
+        if self.interseccaoEncontrada:  # Encontra a intersecção da posição incial
+            self.move()
+            # return
         self.motorEsquerda.run_direct()
         self.motorDireita.run_direct()
 
@@ -192,14 +236,14 @@ class Movimento:
                 motor.duty_cycle_sp = pow
             sleep(0.01)  # Aprox. 100Hz
 
-            interseccaoEncontrada = self.encontraInterseccao()
-            if interseccaoEncontrada:
-                #self.move()
+            self.interseccaoEncontrada = self.encontraInterseccao()
+            if self.interseccaoEncontrada:
+                self.move()
                 break
 
-    '''
-    REFERÊNCIAS
-    
-    As funções seguirLinha e guiarPelaLinha são adaptações do código orinigal disponível em: 
-    https://github.com/Klabbedi/ev3
-    '''
+'''
+REFERÊNCIAS
+
+As funções seguirLinha e guiarPelaLinha são adaptações do código orinigal disponível em: 
+https://github.com/Klabbedi/ev3
+'''
