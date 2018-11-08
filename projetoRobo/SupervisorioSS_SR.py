@@ -3,7 +3,6 @@
 
 import Pyro4
 # Cliente do SS
-
 ns = Pyro4.locateNS("10.42.0.79") # IP do robô
 uri = ns.lookup('serverSS-SR')
 print(uri)

@@ -26,8 +26,8 @@ def get_ip():
         s.close()
     return IP
 
-ns = Pyro4.locateNS('192.168.0.14')
-daemon = Pyro4.Daemon('192.168.0.14')
+ns = Pyro4.locateNS(get_ip())
+daemon = Pyro4.Daemon(get_ip())
 print(get_ip())
 uri = daemon.register(SupervisorioSR_SS)
 ns.register('serverSR-SS',uri)

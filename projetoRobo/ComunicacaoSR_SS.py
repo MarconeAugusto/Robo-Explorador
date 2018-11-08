@@ -6,7 +6,7 @@ import socket
 
 # CLIENTE DO SR
 
-ns = Pyro4.locateNS("192.168.0.14") # IP do PC
+ns = Pyro4.locateNS("191.36.11.134") # IP do PC
 uri = ns.lookup('serverSR-SS')
 print(uri)
 o = Pyro4.Proxy(uri)
@@ -30,4 +30,5 @@ def get_ip():
     finally:
         s.close()
     return IP
+
 

@@ -31,5 +31,5 @@ t2 = Thread(target=iniciarServidorSS)
 
 t1.start()
 time.sleep(5)
-from SupervisorioSR_SS import *
+from SupervisorioSR_SS import *  #####################################
 t2.start()

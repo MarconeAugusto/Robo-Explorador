@@ -15,7 +15,7 @@ from ComunicacaoSR_SS import *
 class Movimento:
 
     def __init__(self, modoDeJogo):
-        self.power = 40
+        self.power = 30
         self.target = 55
         self.kp = float(0.65)
         self.kd = 1
@@ -24,7 +24,6 @@ class Movimento:
         self.minRef = 41
         self.maxRef = 63
         self.modoDeJogo = modoDeJogo
-        # self.direcao = 6
 
         # Conecta os dois LargeMotor às portas B e C.
         self.motorEsquerda = LargeMotor(OUTPUT_C)
@@ -40,9 +39,6 @@ class Movimento:
         # Altera modo do sensor ultrassônico.
         self.sensorUS.mode = 'US-DIST-CM'
 
-        t1 = Thread(target=self.abrirServidor())
-        t1.start()
-
         pos1 = Tesouro(3, 0, 0)
         pos2 = Tesouro(0, 4, 0)
         # pos3 = Tesouro(4, 5, 0)
@@ -51,27 +47,23 @@ class Movimento:
         self.pos = Posicionamento(0, 0, 1)
         self.aut = Autonomo(self.pos, self.lista2)
 
-    # def setDirecao(self, direcao):
-    #     self.direcao = direcao
-    #
-    # def getDirecao(self):
-    #     return self.direcao
-
-    def abrirServidor(self):
+    #def abrirServidor(self):
         self.comunica = ComunicacaoSR_SS()
 
-    def move(self):
+    def modoJogo(self):
+	    # SELECIONA MODO DE JOGO
+	    if self.modoDeJogo == 1:  # Autonomo
+		    print("Consulta estrategia")
+		    direcao = self.aut.executaEstrategia()
+		    self.move(direcao)
+	    elif self.modoDeJogo == 2:  # Manual
+		    direcao = self.comunica.setDirecaoManual()
+		    # direcao = self.test.defineDirecao()
+		    #d = input("Informe a direcao: ")
+		    #direcao = int(d)
+		    self.move(direcao)
 
-        # SELECIONA MODO DE JOGO
-        if self.modoDeJogo == 1:  # Autonomo
-            print("Consulta estrategia")
-            direcao = self.aut.executaEstrategia()
-
-        elif self.modoDeJogo == 2:  # Manual
-            #d = input("Informe a direcao: ")
-            #direcao = int(d)
-            direcao = self.comunica.setDirecaoManual()
-
+    def move(self,direcao):
         if direcao == 5:
             return
 
@@ -214,9 +206,9 @@ class Movimento:
 
         lastError = error = integral = 0
 
-        self.interseccaoEncontrada = self.encontraInterseccao()
-        if self.interseccaoEncontrada:  # Encontra a intersecção da posição incial
-            self.move()
+        #self.interseccaoEncontrada = self.encontraInterseccao()
+        #if self.interseccaoEncontrada:  # Encontra a intersecção da posição incial
+            #self.move()
             # return
         self.motorEsquerda.run_direct()
         self.motorDireita.run_direct()
@@ -238,7 +230,7 @@ class Movimento:
 
             self.interseccaoEncontrada = self.encontraInterseccao()
             if self.interseccaoEncontrada:
-                self.move()
+                self.modoJogo()
                 break
 
 '''
