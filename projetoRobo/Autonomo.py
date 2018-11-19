@@ -2,6 +2,7 @@
 # coding: utf-8
 import pickle
 
+import Pyro4
 from Movimento import *
 
 
@@ -74,7 +75,7 @@ class Autonomo:
 
         print("Ordena Lista")
 
-        ns = Pyro4.locateNS("191.36.15.42")  # IP do SS
+        ns = Pyro4.locateNS("191.36.10.123")  # IP do SS
         uri = ns.lookup('listaCacas')
         print(uri)
         self.o = Pyro4.Proxy(uri)
@@ -87,7 +88,7 @@ class Autonomo:
 
         # enquanto a lista não tiver fim
         tesouro1 = Tesouro(lista[0][0], lista[0][1], 0)
-        #tesouro2 = Tesouro(lista[1][0], lista[1][1], 0)
+        tesouro2 = Tesouro(lista[1][0], lista[1][1], 0)
         #tesouro3 = Tesouro(lista[2][0], lista[2][1], 0)
 
         self.listaDeCacas.append(tesouro1)
@@ -137,7 +138,9 @@ class Autonomo:
     def finalizarJogo(self):
         self.finaliza = True
 
-    def executaEstrategia(self):
+    def executaEstrategia(self,pos):
+        global posAtual
+        posAtual = pos
         print("Executa estrategia")
         # while not self.finaliza:
         # obter a lista de cacas no SS
@@ -148,7 +151,6 @@ class Autonomo:
         # print(self.listaDeEstrategia[0].getDistanciaAteORobo())
 
         # EIXO Y
-        global posAtual
         if (self.listaDeEstrategia[0].getEixoY() == posAtual.getEixoY()) and (
                 self.listaDeEstrategia[0].getEixoX() == posAtual.getEixoX()):
             if len(self.listaDeEstrategia) > 1:
@@ -165,7 +167,7 @@ class Autonomo:
                 print("FIM DE JOGO")
                 return 5
             print("CHEGUEI!")
-            self.executaEstrategia()
+            self.executaEstrategia(posAtual)
 
         if self.listaDeEstrategia[0].getEixoY() < posAtual.getEixoY():  # SE A CACA ESTA ABAIXO DO ROBO
             print("CACA ESTA ABAIXO DO ROBO")

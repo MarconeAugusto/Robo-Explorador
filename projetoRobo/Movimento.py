@@ -20,7 +20,7 @@ pos = Posicionamento(0, 0, 1)
 @Pyro4.oneway
 class Movimento:
     def __init__(self):
-        self.power = 32
+        self.power = 35
         self.target = 55
         self.kp = float(0.65)
         self.kd = 1
@@ -50,13 +50,15 @@ class Movimento:
     def modoJogo(self, mdj):
         print("modo de jogo: ", mdj)
         global modoDeJogo
+        global pos
+        self.posAtual = pos
         modoDeJogo = mdj
         # SELECIONA MODO DE JOGO
         if modoDeJogo == 1:  # Autonomo
             print("Consulta estrategia")
-            direcao = self.aut.executaEstrategia()
+            direcao = self.aut.executaEstrategia(self.posAtual)
             self.move(direcao)
-        # elif modoDeJogo == 2:  # Manual
+        #elif modoDeJogo == 2:  # Manual
         # direcao = self.comunica.setDirecaoManual()
         # self.move(direcao)
 
