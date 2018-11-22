@@ -106,7 +106,7 @@ class Packing:
         #adiconar aqui a implementação do objeto distrído que vai chamar a função validaCaca()
         self.texto.set("Validando caça...")
         print("Validando caça")
-        ClienteSR.setCorLed(self)
+        #ClienteSR.setCorLed(self)
 
     def pausaPressionado(self):
         #adiconar aqui a implementação do objeto distrído que vai chamar a função pausa()

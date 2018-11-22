@@ -5,9 +5,9 @@ from InterfaceGrafica import *
 
 a = 1
 
-pos1 = [3,0]
-pos2 = [0,4]
-pos3 = [4,5]
+pos1 = [2,2]
+pos2 = [1,1]
+pos3 = [3,3]
 lista2 = [pos1, pos2, pos3]
 #lista2 = [pos1]
 
@@ -44,13 +44,19 @@ class PrincipalSS:
         else:
             return 1
 
-    def removeCaca(self, i):
+    def removeCaca(self, x,y):
         global lista2
         if len(lista2) == 0:
             print("LISTA VAZIA NO SS")
         else:
-            lista2.pop(i)
-            print("LISTA REMOVIDA: ", lista2)
+            self.i = 0
+            for n in lista2:
+                if (lista2[self.i][0] == x and lista2[self.i][1] == y):
+                    print("Posição a ser removida", lista2[self.i])
+                    lista2.pop(self.i)
+                    print("LISTA ATUALIZADA: ", lista2)
+                self.i = self.i + 1
+
 
 if __name__ == '__main__':
     PrincipalSS.modoJogo(self)

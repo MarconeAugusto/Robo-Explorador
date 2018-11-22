@@ -20,7 +20,7 @@ pos = Posicionamento(0, 0, 1)
 @Pyro4.oneway
 class Movimento:
     def __init__(self):
-        self.power = 35
+        self.power = 50
         self.target = 55
         self.kp = float(0.65)
         self.kd = 1
@@ -48,7 +48,7 @@ class Movimento:
         #self.pos = Posicionamento(0, 0, 1)
 
     def modoJogo(self, mdj):
-        print("modo de jogo: ", mdj)
+        #print("modo de jogo: ", mdj)
         global modoDeJogo
         global pos
         self.posAtual = pos
@@ -57,16 +57,14 @@ class Movimento:
         if modoDeJogo == 1:  # Autonomo
             print("Consulta estrategia")
             direcao = self.aut.executaEstrategia(self.posAtual)
-            self.move(direcao)
-        #elif modoDeJogo == 2:  # Manual
-        # direcao = self.comunica.setDirecaoManual()
-        # self.move(direcao)
+            if direcao != 5:
+                self.move(direcao)
+            else:
+                print("Fim de jogo movimento")
+                pass
 
     def move(self, direcao):
-        # PAUSA DO 5 É PRO MODO AUTÔNOMO
         global pos
-        if direcao == 5:
-            return
 
         self.sensorCor.mode = 'COL-COLOR'  # Altera para modo refletido
         cor = self.sensorCor.value()
@@ -74,7 +72,6 @@ class Movimento:
         if direcao == 0:
             self.frente(cor)
             pass
-
         elif direcao == 1:
             self.esquerda(cor)
             # Orientacao
@@ -83,7 +80,6 @@ class Movimento:
             else:
                 pos.setOrientacao(pos.getOrientacao() - 1)
             pass
-
         elif direcao == 2:
             self.direita(cor)
             # Orientacao
@@ -92,21 +88,13 @@ class Movimento:
             else:
                 pos.setOrientacao(pos.getOrientacao() + 1)
             pass
-
         elif direcao == 3:
             self.re(cor)
             self.atualizaOrientacaoRe()
             pass
 
-        print("Valor atual de Y: ", pos.getEixoY())
-        print("Valor prox de Y: ", (pos.getEixoY() + 1))
-
-        self.atualizaCoordenada()
-        print(pos.paraString())
         self.seguirLinha(self.power, self.target, self.kp, self.kd, self.ki, self.direction, self.minRef, self.maxRef)
 
-        print("Valor atual de Y: ", pos.getEixoY())
-        print("Valor prox de Y: ", (pos.getEixoY() + 1))
 
     def atualizaOrientacaoRe(self):
         if pos.getOrientacao() == 3:
@@ -127,22 +115,18 @@ class Movimento:
             pos.setEixoX(pos.getEixoX() - 1)
 
     def frente(self, cor):
-        # print("Indo para a frente")
         while (cor != 1) and (cor != 6):  # Enquanto for verde
             cor = self.sensorCor.value()
             self.motorEsquerda.run_forever(speed_sp=100)
             self.motorDireita.run_forever(speed_sp=50)
 
     def esquerda(self, cor):
-        # print("Virando para a esquerda")
         while (cor != 1):
             cor = self.sensorCor.value()
             self.motorEsquerda.stop(stop_action='brake')
             self.motorDireita.run_forever(speed_sp=200)
 
     def direita(self, cor):
-        # print("Virando para a direita")
-        # self.frente(cor)
         self.motorDireita.stop(stop_action='brake')
         self.motorEsquerda.run_forever(speed_sp=180)
         sleep(2)
@@ -152,7 +136,6 @@ class Movimento:
             self.motorEsquerda.run_forever(speed_sp=200)
 
     def re(self, cor):
-        # print("Marcha a re")
         self.direita(cor)
         self.direita(cor)
 
@@ -171,9 +154,6 @@ class Movimento:
         self.sensorCor.mode = 'COL-COLOR'  # Altera para modo cor
         cor = self.sensorCor.value()
         if (cor == 3):  # verde
-            # self.motorEsquerda.run_forever(speed_sp=10)
-            # self.motorDireita.run_forever(speed_sp= 10)
-            # sleep(0.5)
             self.motorEsquerda.stop(stop_action='brake')
             self.motorDireita.stop(stop_action='brake')
             return True
@@ -194,9 +174,7 @@ class Movimento:
         return (int(power_left), int(power_right))
 
     def seguirLinha(self, power, target, kp, kd, ki, direction, minRef, maxRef):
-
         lastError = error = integral = 0
-
         self.motorEsquerda.run_direct()
         self.motorDireita.run_direct()
 
@@ -216,5 +194,9 @@ class Movimento:
             self.interseccaoEncontrada = self.encontraInterseccao()
             if self.interseccaoEncontrada:
                 global modoDeJogo
+                global pos
+                print("Interseccao encontrada")
+                self.atualizaCoordenada()
+                print(pos.paraString())
                 self.modoJogo(modoDeJogo)
                 break
