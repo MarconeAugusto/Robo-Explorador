@@ -106,13 +106,22 @@ class Packing:
         #adiconar aqui a implementação do objeto distrído que vai chamar a função validaCaca()
         self.texto.set("Validando caça...")
         print("Validando caça")
+        PrincipalSS.validaCaca(self)
         #ClienteSR.setCorLed(self)
 
     def pausaPressionado(self):
         #adiconar aqui a implementação do objeto distrído que vai chamar a função pausa()
-        self.texto.set("Jogo pausado")
-        print("Jogo pausado")
-        ClienteSR.getEndMAC(self)
+
+        if PrincipalSS.getEstadoDoJogo(self):
+            self.texto.set("Jogo pausado")
+            print("Jogo pausado")
+            estado = False
+            PrincipalSS.setEstadoDoJogo(self,estado)
+        else:
+            self.texto.set("Continua jogo")
+            print("Continua jogo")
+            estado = True
+            PrincipalSS.setEstadoDoJogo(self,estado)
 
     def fimPressionado(self):
         #adiconar aqui a implementação do objeto distrído que vai chamar a função fimDeJogo()
@@ -154,7 +163,7 @@ class Configuracao(threading.Thread):
             ns = Pyro4.locateNS(self.get_ip())
             uri = daemon.register(PrincipalSS)
             ns.register("listaCacas", uri)
-            print("Classe PrincipalSS registarda")
+            print("Classe PrincipalSS registrada")
             print(uri)
             daemon.requestLoop()
 
