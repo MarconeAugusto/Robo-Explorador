@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
-import pickle
 
+import pickle
 import Pyro4
 from Movimento import *
-
 
 class Tesouro:
     def __init__(self, eixoX, eixoY, distanciaAteORobo):
@@ -29,7 +28,7 @@ class Tesouro:
 
     def setDistanciaAteORobo(self, distanciaAteORobo):
         self.distanciaAteORobo = distanciaAteORobo
-
+        
 posAtual = Posicionamento(0,0,1)
 
 class Autonomo:
@@ -37,8 +36,6 @@ class Autonomo:
     def __init__(self):
         self.listaDeCacas = []
         self.listaDeEstrategia = []
-        self.pausa = False
-        self.finaliza = False
         self.menorI = 0
 
     def setPosicaoAdvsersario(self, posAdversario):
@@ -65,7 +62,7 @@ class Autonomo:
 
     def ordenaLista(self):
         print("Ordena lista")
-        ns = Pyro4.locateNS("191.36.10.180")  # IP do SS
+        ns = Pyro4.locateNS("191.36.15.99")  # IP do SS
         uri = ns.lookup('listaCacas')
         self.o = Pyro4.Proxy(uri)
         lista = self.o.getListaCacas()
@@ -83,7 +80,7 @@ class Autonomo:
                 self.j = self.j + 1
 
         while len(self.listaDeCacas) != 0:
-            self.distanciaMinima = 6 # No comeco deve ser a maior distancia
+            self.distanciaMinima = 20 # NAO ALTERAR PARA VALORES MENORES QUE 13, No comeco deve ser a maior distancia
             self.menorI = 0
             self.i = 0
 
@@ -98,40 +95,33 @@ class Autonomo:
             self.adicionarTesouro(self.listaDeCacas[self.menorI].getEixoX(), self.listaDeCacas[self.menorI].getEixoY(),self.distanciaMinima)
             self.listaDeCacas.pop(self.menorI)
 
-
     def getListaDeEstrategia(self):
         return self.listaDeEstrategia
-
-    def pausar(self):
-        self.pausa = True
-
-    def continuaJogo(self):
-        self.pausa = False
-
-    def finalizarJogo(self):
-        self.finaliza = True
 
     def executaEstrategia(self,pos):
         print("Executa estrategia")
         global posAtual
+
         posAtual = pos
 
-        erro = self.ordenaLista()
-        if erro == 1:
-            print("lista de estrategia vazia")
-            return 5
+        self.ordenaLista()
 
         print("Lista de estrategia : [" ,self.listaDeEstrategia[0].getEixoX(),",",self.listaDeEstrategia[0].getEixoY(), "]")
 
         #verifica se o robo esta na posicao da lista
         if (self.listaDeEstrategia[0].getEixoY() == posAtual.getEixoY()) and (self.listaDeEstrategia[0].getEixoX() == posAtual.getEixoX()):
-            if len(self.listaDeEstrategia) > 1:
-                print("Solicita remocao caca no SS: X =" ,self.listaDeEstrategia[0].getEixoX(),"Y =", self.listaDeEstrategia[0].getEixoY() )
-                self.o.removeCaca(self.listaDeEstrategia[0].getEixoX(),self.listaDeEstrategia[0].getEixoY())
-                self.listaDeEstrategia.pop(0)
-                print("CHEGUEI!")
-                #return
-            elif len(self.listaDeEstrategia) == 1:
+
+            print("CHEGUEI!")
+
+            self.o.validaCaca()
+
+            print("Solicita remocao caca no SS: X =" ,self.listaDeEstrategia[0].getEixoX(),"Y =", self.listaDeEstrategia[0].getEixoY() )
+            self.o.removeCaca(self.listaDeEstrategia[0].getEixoX(),self.listaDeEstrategia[0].getEixoY())
+            self.listaDeEstrategia.pop(0)
+
+            erro = self.ordenaLista()
+            if erro == 1: # AO INVES DE ORDENAR A LISTA NOVAMENTE, TENTAR OBTER SO O TAMANHO DELA
+                print("lista de estrategia vazia")
                 return 5
 
         if self.listaDeEstrategia[0].getEixoY() < posAtual.getEixoY():  # SE A CACA ESTA ABAIXO DO ROBO
@@ -177,4 +167,3 @@ class Autonomo:
                     return 3
             else:
                 return 0
-
