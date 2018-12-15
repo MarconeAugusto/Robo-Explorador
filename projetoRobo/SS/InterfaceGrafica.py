@@ -6,8 +6,9 @@ from tkinter import *
 import threading
 import time
 import Pyro4
-from ClienteSR import *
-from SS import PrincipalSS
+from projetoRobo.SS.Switch import *
+from projetoRobo.SS.SS import PrincipalSS
+
 
 class Packing:
 

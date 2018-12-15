@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-class Posicionamento:
+class PosicionamentoSS:
 
     def __init__(self, eixoX, eixoY, orientacao):
         self.eixoX = eixoX

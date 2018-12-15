@@ -3,16 +3,23 @@
 from threading import Thread
 
 from self import self
-from InterfaceGrafica import *
-from Posicionamento import *
+
+from projetoRobo.SS.InterfaceGrafica import *
+from projetoRobo.SS.PosicionamentoSS import *
+from projetoRobo.SS.Switch import *
+#from projetoRobo.SS.clienteSR import *
+from projetoRobo.SS.ReceptorSA import *
+from projetoRobo.SS.ComunicacaoSR import *
+
 
 teste = True
 
-a = 1 #Autonomo
+##a = 1 #Autonomo
 #a = 2 #Manual
+a = 0
 
-posAtual = Posicionamento(0, 0, 1)
-posProx = Posicionamento(0, 0, 1)
+posAtual = PosicionamentoSS(0, 0, 1)
+posProx = PosicionamentoSS(0, 0, 1)
 
 pos1 = [2,2]
 pos2 = [1,1]
@@ -35,39 +42,11 @@ class PrincipalSS(threading.Thread):
         print("Cor escolhida: ", ClienteSR.setCorLed(self, corLED))
 
 
-    def modoJogo(self):
-        global a
+    def modoJogo(self,mdj):
+        if mdj == 1:
+            threadSA = Switch('g2')
+            threadSA.start()
 
-        t = PrincipalSS()
-        t.start() # Inicia configInicial
-        t.join() # Aguarda que configInicial termine
-
-        if a == 2:  # modo Manual
-            # Create new threads
-            thread1 = Configuracao(1)
-            thread2 = Configuracao(2)
-            thread4 = Configuracao(4)
-
-            # Start new Threads
-            thread1.start()
-            time.sleep(1)
-            thread2.start()
-            time.sleep(1)
-            thread4.start()
-
-        elif a == 1:  # modo autonomo
-            print("Implementar modo Autonomo")
-            # Create new threads
-            thread2 = Configuracao(2)  # inicia servidor Pyro4 do SS
-            thread3 = Configuracao(3)  # inicia interface Autonomo , alterar depois
-            thread4 = Configuracao(4)  # Registra o servidor de nomes
-            # Start new Threads
-            thread2.start()
-            time.sleep(1)
-            thread3.start()
-            thread4.start()
-            time.sleep(1)
-            ClienteSR.MovimentoAutonomo(self)
 
     def getListaCacas(self):
         global lista2
@@ -134,5 +113,9 @@ class PrincipalSS(threading.Thread):
     def run(self):
         PrincipalSS.configInicial(self)
 
+    def setModoJogo(self,mdj):
+        global a
+        a = mdj
+
 if __name__ == '__main__':
-    PrincipalSS.modoJogo(self)
+    PrincipalSS.modoJogo(self,1)
