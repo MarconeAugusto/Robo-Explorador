@@ -21,6 +21,7 @@ class ClienteSR:
         print(uri)
         o = Pyro4.Proxy(uri)
         return o.setCorLed(corLED)
+        #o.setCorLed(corLED)
 
     def getEndMAC(self):
         ns = Pyro4.locateNS("10.42.0.79")  # IP do robô
@@ -28,6 +29,20 @@ class ClienteSR:
         print(uri)
         o = Pyro4.Proxy(uri)
         return o.getEndMAC()
+
+    def tratamentoLista(self,lista):
+        self.listaDeCacas = []
+        print('tamanho',lista)
+        while len(lista) != 0:
+            self.j = 0
+            for n in lista:
+                cacas = [lista[self.j]['x'],lista[self.j]['y']]
+                print('Obitido',cacas)
+                self.listaDeCacas.append(cacas)
+                lista.pop(self.j)
+                self.j = self.j + 1
+        PrincipalSS.setListaCacas(self,self.listaDeCacas)
+
 
     ##acessada via interface gráfica
     def MovimentoManual(self, direcao):
@@ -112,7 +127,7 @@ class Switch(Thread):
             with compartilhados.sw_lock:
                 msg = deepcopy(compartilhados.sw_msg)
                 print("Mensagem SA: ",msg)
-                print(msg['modo_jogo'])
+                #print(msg['modo_jogo'])
 
                 if msg['_dir'] == 'sa':
                     # Mensagens Vinda do SA
@@ -139,7 +154,9 @@ class Switch(Thread):
                         pass
 
                     elif cmd == SA_to_SS.CadastraRobo:
-                        pass
+                        print('Cadastra robo')
+                        print("Mensagem",msg['cor'])
+                        ClienteSR.setCorLed(self,msg['cor'])
 
                     elif cmd == SA_to_SS.Continua:
                         pass
@@ -152,6 +169,7 @@ class Switch(Thread):
 
                     elif cmd == SA_to_SS.NovoJogo:
                         print("Novo jogo")
+                        ClienteSR.tratamentoLista(self,msg['cacas'])
                         if msg['modo_jogo'] == 2:
                             print("Modo Autonomo")
                             # Create new threads
@@ -166,13 +184,6 @@ class Switch(Thread):
                             time.sleep(1)
                             ClienteSR.MovimentoAutonomo(self)
 
-                            #coord = msg['x'] + msg['y']
-
-                            ## TRATAR AS CAÇAS
-                            #self.srCOM.enviar(self.srCOM.getRobo(), msg['cacas'])
-                            print()
-
-
                         elif msg['modo_jogo'] == 1:
                             #coord = msg['x'] + msg['y']
                             print("Modo Manual")
@@ -180,7 +191,6 @@ class Switch(Thread):
                             thread1 = InterfaceGrafica.Configuracao(1)
                             thread2 = InterfaceGrafica.Configuracao(2)
                             thread4 = InterfaceGrafica.Configuracao(4)
-
                             # Start new Threads
                             thread1.start()
                             time.sleep(1)
@@ -190,17 +200,15 @@ class Switch(Thread):
 
 
                 elif msg['_dir'] == 'ss':
-                    # Mensagens Vinda do Ss
+                    print(" Mensagens Vinda do SS")
                     if 'cmd' not in msg:
                         compartilhados.sw_event.clear()
                         continue
 
                     elif msg['cmd'] == SS_to_SS.ValidaCaca:
-                        msg = {'_dir': 'ss', '_robo': self.distributor.getNome(),
+                        msg = {'_dir': 'ss', '_robo': 'g2',
                                'cmd': SS_to_SA.ValidaCaca, 'x': msg['x'], 'y': msg['y']}
                         self._envia_msg_sa(msg)
-
-
 
 
                 elif msg['_dir'] == 'sr':

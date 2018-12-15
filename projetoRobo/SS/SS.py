@@ -4,6 +4,7 @@ from threading import Thread
 
 from self import self
 
+from projetoRobo.SA.mensagens_auditor import MsgSStoSA
 from projetoRobo.SS.InterfaceGrafica import *
 from projetoRobo.SS.PosicionamentoSS import *
 from projetoRobo.SS.Switch import *
@@ -21,15 +22,15 @@ a = 0
 posAtual = PosicionamentoSS(0, 0, 1)
 posProx = PosicionamentoSS(0, 0, 1)
 
-pos1 = [2,2]
-pos2 = [1,1]
-pos3 = [3,3]
+# pos1 = [2,2]
+# pos2 = [1,1]
+# pos3 = [3,3]
 
 estado = True
 
 #lista2 = [pos1, pos2, pos3]
-lista2 = [pos1, pos2]
-#lista2 = [pos2]
+#lista2 = [pos1, pos2]
+lista2 = []
 
 @Pyro4.expose
 @Pyro4.oneway
@@ -50,17 +51,15 @@ class PrincipalSS(threading.Thread):
 
     def getListaCacas(self):
         global lista2
-        #global teste
-        #print("Lista enviada: ", lista2)
-        # if teste:
-        #     print("Removendo posicao aleatoria")
-        #     lista2.pop(1)
-        #     teste = False
-
         if len(lista2) != 0:
             return lista2
         else:
             return 1
+
+    def setListaCacas(self,lista):
+        global lista2
+        print('Lista set', lista)
+        lista2 = lista
 
     def removeCaca(self, x,y):
         global lista2
@@ -76,6 +75,10 @@ class PrincipalSS(threading.Thread):
                 self.i = self.i + 1
 
     def validaCaca(self):
+        global posAtual
+        print("solicitando validação da caça")
+        # msg = {"_dir": "ss", "_robo": 'g2'}
+        #compartilhados.sw_msg({'_dir': 'ss', '_robo': 'g2','cmd': SS_to_SA.ValidaCaca, 'x': posAtual.getEixoX(), 'y': posAtual.getEixoY()})
         opt = input("Minha caça é válida?\n"
                     "1) Válida\n"
                     "2) Não válida\n"

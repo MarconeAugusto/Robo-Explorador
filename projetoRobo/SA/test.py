@@ -42,7 +42,7 @@ if __name__ == '__main__':
 				cor = int(input("Cor (int):"))
 				mac = input("MAC: ")
 				gerente.cadastra_robo(nome, cor, mac)
-				msg.update({"cmd": MsgSAtoSS.CadastraRobo, "nome": nome, "cor": cor, "mac": mac, "_robo": "cadastro"})
+				msg.update({"cmd": MsgSAtoSS.CadastraRobo, "nome": nome, "cor": cor, "mac": mac, "_robo": nome})
 
 			elif op == 2:
 				# Solicita ID

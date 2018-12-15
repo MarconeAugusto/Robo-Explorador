@@ -1,7 +1,7 @@
 import pika
 import json
 from threading import Thread
-import projetoRobo.SA.compartilhados
+from projetoRobo.SA import compartilhados
 from copy import deepcopy
 import time
 
@@ -22,7 +22,8 @@ class Receptor(Thread):
 			msg = json.loads(body)
 		except:
 			return
-
+		print("MENSAGEM RECEBIDA DO SS")
+		print("msg:", msg)
 		# Identificador (indica que a msg veio do SS)
 		msg['_dir'] = 'ss'
 
