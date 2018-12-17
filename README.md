@@ -24,7 +24,7 @@ Primeiramente, deve-se iniciar o sistema do robô (SR). Para isso, dentro da pas
 Em seguida, inicie o servidor Pyro4 e execute o arquivo Menu.py contido nessa mesma pasta:
 
 ```
-pyro4 --host ip_do_robo
+pyro4-ns --host ip_do_robo
 python3 Menu.py
 ```
 
