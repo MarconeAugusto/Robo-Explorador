@@ -8,7 +8,7 @@
 
 
 
-Este projeto foi desenvolvido na disciplina de Projeto Integrador II. Que consiste em desenvolver um robô que seja capaz de encontrar caças em um tabuleiro, bem como estar sempre se comunicando com um sistema externo, denominado Sistema Supervisório (SS), de onde receberá e enviará informações. Tais como instruções de novas direções, atualização de coordenadas e lista de caças.
+Este projeto foi desenvolvido na disciplina de Projeto Integrador II (PJI29006), durante o semestre 2018.2. Que consiste em desenvolver um robô que seja capaz de encontrar caças em um tabuleiro, bem como estar sempre se comunicando com um sistema externo, denominado Sistema Supervisório (SS), de onde receberá e enviará informações. Tais como instruções de novas direções, atualização de coordenadas e lista de caças.
 
 Por sua vez, o SS, deverá tratar essas informações e enviá-las ao Sistema de Auditoria (SA). O SA, fica responsável por todo o controle da partida. Coletando e enviando dados para os SS's de todos os robôs envolvidos no jogo.
 
